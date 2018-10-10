@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import Normalizer
 import random
 import pickle
+from math import floor
 
 def getTrainBatch(batchSize):
     filename = 'data/train.csv'
@@ -25,19 +26,25 @@ def getTrainBatch(batchSize):
 
     training = {}
     for i in trainHeads:
-        j = [list(df[i])]
+        training[i] = list(df[i])
+        ''' j = [list(df[i])]
         scaler = Normalizer().fit(j)
         j_scaled = scaler.transform(j)
-        training[i] = j_scaled[0,:]
+        training[i] = j_scaled[0,:]'''
 
     #Get each row of training together as entry to list of lists    
 
     labels = []
     for i in list(df["winPlacePerc"]):
-        index = int(i*10000)
-        bfr = [0]*10001
-        bfr[index] = 1
+        bfr = [[0 for x in range(10)] for k in range(5)]
+        dec = i
+        for x in range(5):
+            bit = int(floor(dec))
+            bfr[x][bit] = 1
+            dec = round(dec-bit, 4-x)
+            dec = dec * 10
         labels.append(bfr)
+
 
     trainSet = []
     for i in range(len(training['kills'])):
@@ -52,10 +59,9 @@ def getTrainBatch(batchSize):
         'train': np.array(trainSet),
         'label': np.array(labels)
     }
+    
     return data
 
 
 
 
-
-    #data = {i:df[i] for i in keepHeads}
